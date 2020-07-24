@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using HTC.UnityPlugin.ColliderEvent;
+using UnityEngine;
 
-public class Collectible : MonoBehaviour
+public class Collectible : MonoBehaviour, IColliderEventHoverEnterHandler
 {
     private AudioSource bouncingSound;
     private GameController gameController;
@@ -13,13 +14,14 @@ public class Collectible : MonoBehaviour
 
     void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.tag == "Player")
-        {
-            gameController.PlayerCollected(gameObject);
-        }
-        else if (other.gameObject.tag == "Ground")
+        if (other.gameObject.tag == "Ground")
         {
             bouncingSound.Play();
         }
+    }
+
+    public void OnColliderEventHoverEnter(ColliderHoverEventData eventData)
+    {
+        gameController.PlayerCollected(gameObject);
     }
 }

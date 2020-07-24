@@ -1,4 +1,4 @@
-﻿//========= Copyright 2016-2020, HTC Corporation. All rights reserved. ===========
+﻿//========= Copyright 2016-2019, HTC Corporation. All rights reserved. ===========
 
 using HTC.UnityPlugin.Vive;
 using HTC.UnityPlugin.Utility;
@@ -13,16 +13,6 @@ using XRDevice = UnityEngine.VR.VRDevice;
 
 namespace HTC.UnityPlugin.VRModuleManagement
 {
-    public partial class VRModule : SingletonBehaviour<VRModule>
-    {
-        public static readonly bool isSimulatorSupported =
-#if VIU_SIUMULATOR_SUPPORT
-            true;
-#else
-            false;
-#endif
-    }
-
     public interface ISimulatorVRModule
     {
         event Action onActivated;
@@ -53,9 +43,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
         public event Action onDeactivated;
         public event UpdateDeviceStateHandler onUpdateDeviceState;
 
-        public override int moduleOrder { get { return (int)DefaultModuleOrder.Simulator; } }
-
-        public override int moduleIndex { get { return (int)VRModuleSelectEnum.Simulator; } }
+        public override int moduleIndex { get { return (int)VRModuleActiveEnum.Simulator; } }
 
         public uint selectedDeviceIndex { get; private set; }
 
@@ -423,7 +411,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
                         deviceState.serialNumber = "VIU Simulator Controller Device " + RIGHT_INDEX;
                         deviceState.modelNumber = deviceState.serialNumber;
                         deviceState.renderModelName = deviceState.serialNumber;
-                        deviceState.deviceModel = VIUSettings.simulatorRightControllerModel;
+                        deviceState.deviceModel = VRModuleDeviceModel.ViveController;
                         deviceState.input2DType = VRModuleInput2DType.TouchpadOnly;
 
                         var pose = new RigidPose(new Vector3(0.3f, -0.25f, 0.7f), Quaternion.identity);
@@ -442,7 +430,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
                         deviceState.serialNumber = "VIU Simulator Controller Device " + LEFT_INDEX;
                         deviceState.modelNumber = deviceState.serialNumber;
                         deviceState.renderModelName = deviceState.serialNumber;
-                        deviceState.deviceModel = VIUSettings.simulatorLeftControllerModel;
+                        deviceState.deviceModel = VRModuleDeviceModel.ViveController;
                         deviceState.input2DType = VRModuleInput2DType.TouchpadOnly;
 
                         var pose = new RigidPose(new Vector3(-0.3f, -0.25f, 0.7f), Quaternion.identity);
@@ -461,7 +449,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
                         deviceState.serialNumber = "VIU Simulator Generic Tracker Device " + deviceState.deviceIndex;
                         deviceState.modelNumber = deviceState.serialNumber;
                         deviceState.renderModelName = deviceState.serialNumber;
-                        deviceState.deviceModel = VIUSettings.simulatorOtherModel;
+                        deviceState.deviceModel = VRModuleDeviceModel.ViveTracker;
 
                         var pose = new RigidPose(new Vector3(0f, -0.25f, 0.7f), Quaternion.identity);
                         deviceState.isPoseValid = true;
@@ -524,7 +512,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
             if (Input.GetKey(KeyCode.RightArrow)) { poseEuler.y += deltaKeyAngle; }
             if (Input.GetKey(KeyCode.LeftArrow)) { poseEuler.y -= deltaKeyAngle; }
             if (Input.GetKey(KeyCode.C)) { poseEuler.z += deltaKeyAngle; }
-            if (Input.GetKey(KeyCode.Z)) { poseEuler.z -= deltaKeyAngle; }
+            if (Input.GetKey(KeyCode.W)) { poseEuler.z -= deltaKeyAngle; }
             if (Input.GetKey(KeyCode.X)) { poseEuler.z = 0f; }
 
             pose.rot = Quaternion.Euler(poseEuler);
@@ -533,10 +521,10 @@ namespace HTC.UnityPlugin.VRModuleManagement
             var moveForward = Quaternion.Euler(0f, poseEuler.y, 0f) * Vector3.forward;
             var moveRight = Quaternion.Euler(0f, poseEuler.y, 0f) * Vector3.right;
             if (Input.GetKey(KeyCode.D)) { pose.pos += moveRight * deltaMove; }
-            if (Input.GetKey(KeyCode.A)) { pose.pos -= moveRight * deltaMove; }
+            if (Input.GetKey(KeyCode.Q)) { pose.pos -= moveRight * deltaMove; }
             if (Input.GetKey(KeyCode.E)) { pose.pos += Vector3.up * deltaMove; }
-            if (Input.GetKey(KeyCode.Q)) { pose.pos -= Vector3.up * deltaMove; }
-            if (Input.GetKey(KeyCode.W)) { pose.pos += moveForward * deltaMove; }
+            if (Input.GetKey(KeyCode.A)) { pose.pos -= Vector3.up * deltaMove; }
+            if (Input.GetKey(KeyCode.Z)) { pose.pos += moveForward * deltaMove; }
             if (Input.GetKey(KeyCode.S)) { pose.pos -= moveForward * deltaMove; }
 
             deviceState.pose = pose;
@@ -590,7 +578,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
             if (Input.GetKey(KeyCode.RightArrow)) { hmdPoseEuler.y += deltaKeyAngle; }
             if (Input.GetKey(KeyCode.LeftArrow)) { hmdPoseEuler.y -= deltaKeyAngle; }
             if (Input.GetKey(KeyCode.C)) { hmdPoseEuler.z += deltaKeyAngle; }
-            if (Input.GetKey(KeyCode.Z)) { hmdPoseEuler.z -= deltaKeyAngle; }
+            if (Input.GetKey(KeyCode.W)) { hmdPoseEuler.z -= deltaKeyAngle; }
             if (Input.GetKey(KeyCode.X)) { hmdPoseEuler.z = 0f; }
 
             hmdPoseEuler.y += Input.GetAxisRaw("Mouse X") * deltaAngle;
@@ -601,10 +589,10 @@ namespace HTC.UnityPlugin.VRModuleManagement
             var moveForward = Quaternion.Euler(0f, hmdPoseEuler.y, 0f) * Vector3.forward;
             var moveRight = Quaternion.Euler(0f, hmdPoseEuler.y, 0f) * Vector3.right;
             if (Input.GetKey(KeyCode.D)) { hmdPose.pos += moveRight * deltaMove; }
-            if (Input.GetKey(KeyCode.A)) { hmdPose.pos -= moveRight * deltaMove; }
+            if (Input.GetKey(KeyCode.Q)) { hmdPose.pos -= moveRight * deltaMove; }
             if (Input.GetKey(KeyCode.E)) { hmdPose.pos += Vector3.up * deltaMove; }
-            if (Input.GetKey(KeyCode.Q)) { hmdPose.pos -= Vector3.up * deltaMove; }
-            if (Input.GetKey(KeyCode.W)) { hmdPose.pos += moveForward * deltaMove; }
+            if (Input.GetKey(KeyCode.A)) { hmdPose.pos -= Vector3.up * deltaMove; }
+            if (Input.GetKey(KeyCode.Z)) { hmdPose.pos += moveForward * deltaMove; }
             if (Input.GetKey(KeyCode.S)) { hmdPose.pos -= moveForward * deltaMove; }
 
             deviceStates[VRModule.HMD_DEVICE_INDEX].pose = hmdPose;
@@ -770,7 +758,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
                         hints += "Align devices to HMD: " + Bold("F2") + "\n";
                         hints += "Reset all devices to initial state: " + Bold("F3") + "\n\n";
 
-                        hints += "Move: " + Bold("WASD / QE") + "\n";
+                        hints += "Move: " + Bold("ZQSD / AE") + "\n";
                         hints += "Rotate: " + Bold("Mouse") + "\n";
                         hints += "Add and select a device: \n";
                         hints += "    [N] " + Bold("Num 0~9") + "\n";
@@ -803,7 +791,7 @@ namespace HTC.UnityPlugin.VRModuleManagement
                         hints += "    [10+N] " + Bold("Shift + ` + Num 0~5") + "\n";
 
                         hints += "\n";
-                        hints += "Move: " + Bold("WASD / QE") + "\n";
+                        hints += "Move: " + Bold("ZQSD / AE") + "\n";
                         hints += "Rotate (pitch and yaw): " + Bold("Mouse") + " or " + Bold("Arrow Keys") + "\n";
                         hints += "Rotate (roll): " + Bold("ZC") + "\n";
                         hints += "Reset roll: " + Bold("X") + "\n";
